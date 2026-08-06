@@ -208,6 +208,15 @@ export const GetSpreadsheetUrlResponse = zod.object({
 
 
 /**
+ * @summary Get the late-fee scheduler status
+ */
+export const GetLateFeeScheduleResponse = zod.object({
+  "lastAppliedAt": zod.string().nullable(),
+  "nextScheduledDate": zod.string()
+})
+
+
+/**
  * @summary Get dashboard summary stats
  */
 export const GetDashboardResponse = zod.object({

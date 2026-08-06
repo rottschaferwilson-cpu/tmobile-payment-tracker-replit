@@ -28,6 +28,7 @@ import type {
   DashboardSummary,
   HealthStatus,
   LateFeeResult,
+  LateFeeSchedule,
   SpreadsheetInfo,
   Transaction,
   TransactionInput
@@ -786,6 +787,83 @@ export function useGetSpreadsheetUrl<TData = Awaited<ReturnType<typeof getSpread
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetSpreadsheetUrlQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetLateFeeScheduleUrl = () => {
+
+
+
+
+  return `/api/admin/late-fee-schedule`
+}
+
+/**
+ * @summary Get the late-fee scheduler status
+ */
+export const getLateFeeSchedule = async ( options?: Parameters<typeof customFetch>[1]): Promise<LateFeeSchedule> => {
+
+  return customFetch<LateFeeSchedule>(getGetLateFeeScheduleUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLateFeeScheduleQueryKey = () => {
+    return [
+    `/api/admin/late-fee-schedule`
+    ] as const;
+    }
+
+
+export const getGetLateFeeScheduleQueryOptions = <TData = Awaited<ReturnType<typeof getLateFeeSchedule>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLateFeeSchedule>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLateFeeScheduleQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLateFeeSchedule>>> = ({ signal }) => getLateFeeSchedule({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLateFeeSchedule>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLateFeeScheduleQueryResult = NonNullable<Awaited<ReturnType<typeof getLateFeeSchedule>>>
+export type GetLateFeeScheduleQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get the late-fee scheduler status
+ */
+
+export function useGetLateFeeSchedule<TData = Awaited<ReturnType<typeof getLateFeeSchedule>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLateFeeSchedule>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLateFeeScheduleQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

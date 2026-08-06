@@ -1,7 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { ensureSheets } from "./lib/googleSheets";
-import { startScheduler } from "./lib/scheduler";
+import { initScheduler } from "./lib/scheduler";
 
 const rawPort = process.env["PORT"];
 
@@ -30,6 +30,6 @@ app.listen(port, (err) => {
     logger.error({ err: e }, "Failed to ensure sheets — will retry on first request");
   });
 
-  // Start the automatic late-fee scheduler (10th of each month, with catch-up)
-  startScheduler();
+  // Start the automatic late-fee scheduler (fires on the 10th of each month)
+  initScheduler();
 });

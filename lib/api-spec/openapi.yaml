@@ -214,6 +214,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/SpreadsheetInfo"
 
+  /admin/late-fee-schedule:
+    get:
+      operationId: getLateFeeSchedule
+      tags: [admin]
+      summary: Get the late-fee scheduler status
+      responses:
+        "200":
+          description: Scheduler status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LateFeeSchedule"
+
   /dashboard:
     get:
       operationId: getDashboard
@@ -414,6 +427,15 @@ components:
         url:
           type: string
         title:
+          type: string
+
+    LateFeeSchedule:
+      type: object
+      required: [lastAppliedAt, nextScheduledDate]
+      properties:
+        lastAppliedAt:
+          type: ["string", "null"]
+        nextScheduledDate:
           type: string
 
     DashboardSummary:

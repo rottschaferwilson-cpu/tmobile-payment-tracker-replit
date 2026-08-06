@@ -1,118 +1,124 @@
 /**
  * Automatic late-fee scheduler.
  *
- * Runs on the 10th of every month at 12:01 AM.
+ * Fires on exactly the 10th of every month (UTC), checked hourly.
  *
- * Idempotency guarantee (Task #4):
- *   The month+year of the last successful run is persisted to
- *   data/last-late-fee.txt.  If the server restarts on the 10th after fees
- *   have already been applied, the guard file prevents a second run.
+ * Idempotency: uses the Google Sheets Transactions data as the durable
+ * source of truth — if a `late_fee` record already exists for the current
+ * month (whether from a scheduled or manual admin run) the scheduler skips.
+ * This is safe across restarts and multi-instance deployments.
  *
- * Catch-up logic:
- *   On startup we also check whether today is >= the 10th and fees have NOT
- *   yet been applied for this month — this handles the case where the server
- *   was down on the 10th.
+ * In-process concurrency: an `isRunning` flag prevents simultaneous
+ * invocations within the same process.
  */
 
-import cron from "node-cron";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import { applyLateFees } from "./googleSheets";
 import { logger } from "./logger";
+import { applyLateFees, hasLateFeeThisMonth, getLastLateFeeDate } from "./googleSheets";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.resolve(__dirname, "../data");
-const GUARD_FILE = path.join(DATA_DIR, "last-late-fee.txt");
+// ─── State ────────────────────────────────────────────────────────────────────
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+let schedulerInterval: ReturnType<typeof setInterval> | null = null;
+let isRunning = false;
 
-function monthKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getLastRunKey(): string | null {
-  try {
-    if (fs.existsSync(GUARD_FILE)) {
-      return fs.readFileSync(GUARD_FILE, "utf8").trim() || null;
-    }
-  } catch {
-    // ignore
+/**
+ * Returns the next 10th-of-the-month at midnight UTC after the current moment.
+ */
+export function nextScheduledDate(): Date {
+  const now = new Date();
+  const candidate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 10));
+  if (candidate <= now) {
+    candidate.setUTCMonth(candidate.getUTCMonth() + 1);
   }
-  return null;
+  return candidate;
 }
 
-function recordRun(date: Date): void {
+/**
+ * Run the late-fee job, guarded against concurrent invocations within this
+ * process. Durability against multi-instance / cross-restart races is
+ * handled by the Sheet-based idempotency check in `tick()`.
+ */
+async function runLateFees(reason: string): Promise<void> {
+  if (isRunning) {
+    logger.warn({ reason }, "Late-fee job already in progress — skipping");
+    return;
+  }
+  isRunning = true;
+  logger.info({ reason }, "Running late fees");
   try {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-    fs.writeFileSync(GUARD_FILE, monthKey(date), "utf8");
+    const result = await applyLateFees();
+    logger.info(
+      { applied: result.applied, skipped: result.skipped, totalFeesAdded: result.totalFeesAdded },
+      "Late fees completed"
+    );
   } catch (err) {
-    logger.error({ err }, "Failed to write late-fee guard file");
+    logger.error({ err }, "Late fees failed");
+  } finally {
+    isRunning = false;
   }
 }
 
-export function getSchedulerStatus(): {
-  lastRunKey: string | null;
-  nextRunDate: string;
-} {
-  const lastRunKey = getLastRunKey();
-  // Next run: the 10th of next month if already ran this month, or the 10th
-  // of this month if we haven't run yet and it hasn't passed yet.
+/**
+ * Tick: fires on exactly the 10th of the month (UTC).
+ * Uses the Transactions sheet as the durable idempotency source so that
+ * restarts, manual admin runs, and multi-instance deployments all share
+ * the same truth about whether fees have been applied this month.
+ */
+async function tick(): Promise<void> {
   const now = new Date();
-  const thisMonth10 = new Date(now.getFullYear(), now.getMonth(), 10);
-  const nextMonth10 = new Date(now.getFullYear(), now.getMonth() + 1, 10);
-  const alreadyRanThisMonth = lastRunKey === monthKey(now);
-  const nextRun = alreadyRanThisMonth || now > thisMonth10 ? nextMonth10 : thisMonth10;
-  return {
-    lastRunKey,
-    nextRunDate: nextRun.toISOString().split("T")[0],
-  };
-}
+  if (now.getUTCDate() !== 10) return;
 
-// ── Core run logic ────────────────────────────────────────────────────────────
-
-async function runIfDue(reason: string): Promise<void> {
-  const now = new Date();
-  const currentKey = monthKey(now);
-  const lastKey = getLastRunKey();
-
-  if (lastKey === currentKey) {
-    logger.info({ reason, currentKey }, "Late fees already applied this month — skipping");
+  // Check the Sheet — durable across restarts and processes
+  const alreadyApplied = await hasLateFeeThisMonth();
+  if (alreadyApplied) {
+    logger.debug("Late fees already applied this month — skipping tick");
     return;
   }
 
-  logger.info({ reason, currentKey }, "Applying automatic monthly late fees");
-  try {
-    const result = await applyLateFees();
-    recordRun(now);
-    logger.info(
-      { reason, applied: result.applied, skipped: result.skipped, totalFeesAdded: result.totalFeesAdded },
-      "Automatic late fees applied successfully"
-    );
-  } catch (err) {
-    logger.error({ err, reason }, "Automatic late fee application failed — will retry next startup");
-    // Do NOT record the run so next startup/trigger retries
-  }
+  await runLateFees("scheduled-tick");
 }
 
-// ── Public API ────────────────────────────────────────────────────────────────
+// ─── Public API ───────────────────────────────────────────────────────────────
 
-export function startScheduler(): void {
-  // Schedule: 12:01 AM on the 10th of every month
-  cron.schedule("1 0 10 * *", () => {
-    runIfDue("cron-10th").catch((err) => {
-      logger.error({ err }, "Unhandled error in late-fee cron");
-    });
-  });
+export interface SchedulerStatus {
+  lastAppliedAt: string | null;
+  nextScheduledDate: string;
+}
 
-  logger.info("Late-fee scheduler started — runs at 00:01 on the 10th of each month");
+/**
+ * Returns the scheduler status, reading the last-run time from the Sheet
+ * so it reflects manual admin runs as well as scheduled runs.
+ */
+export async function getSchedulerStatus(): Promise<SchedulerStatus> {
+  const lastAppliedAt = await getLastLateFeeDate();
+  return {
+    lastAppliedAt,
+    nextScheduledDate: nextScheduledDate().toISOString(),
+  };
+}
 
-  // Catch-up: if today >= 10th and we haven't run this month yet, apply now
-  const now = new Date();
-  if (now.getDate() >= 10 && getLastRunKey() !== monthKey(now)) {
-    logger.info("Catch-up: applying late fees for the current month (server was down on the 10th)");
-    runIfDue("startup-catchup").catch((err) => {
-      logger.error({ err }, "Unhandled error in catch-up late-fee run");
-    });
-  }
+/**
+ * Initializes the late-fee scheduler. Call once on server startup.
+ * Polls every hour; applies fees only on exactly the 10th of the month.
+ */
+export function initScheduler(): void {
+  if (schedulerInterval) return;
+
+  logger.info("Initializing late-fee scheduler");
+
+  // Initial tick (no-op unless today is the 10th and fees haven't been applied)
+  tick().catch((err) => logger.error({ err }, "Startup tick failed"));
+
+  // Poll every hour
+  schedulerInterval = setInterval(() => {
+    tick().catch((err) => logger.error({ err }, "Hourly tick failed"));
+  }, 60 * 60 * 1000);
+
+  if (schedulerInterval.unref) schedulerInterval.unref();
+
+  logger.info(
+    { nextScheduledDate: nextScheduledDate().toISOString() },
+    "Late-fee scheduler initialized"
+  );
 }

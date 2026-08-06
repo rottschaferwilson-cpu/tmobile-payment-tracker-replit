@@ -164,6 +164,12 @@ export interface SpreadsheetInfo {
   title: string;
 }
 
+export interface LateFeeSchedule {
+  /** @nullable */
+  lastAppliedAt: string | null;
+  nextScheduledDate: string;
+}
+
 export interface RecentTransaction {
   id: string;
   customerId: string;

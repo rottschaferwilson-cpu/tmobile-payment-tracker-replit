@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 import { logger } from "./logger";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.resolve(__dirname, "../data");
+const DATA_DIR = path.resolve(__dirname, "../../data");
 const SPREADSHEET_ID_FILE = path.join(DATA_DIR, "spreadsheet_id.txt");
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -447,6 +447,19 @@ export async function deleteTransaction(customerId: string, txId: string): Promi
   return true;
 }
 
+/**
+ * Returns true if a `late_fee` transaction already exists for the current
+ * calendar month (YYYY-MM). Used by the scheduler to prevent double-charging
+ * when the server restarts on the 10th.
+ */
+export async function hasLateFeeThisMonth(): Promise<boolean> {
+  const id = await getSpreadsheetId();
+  // Columns C=date, D=type in the Transactions sheet
+  const rows = await readSheet(id, "Transactions!C2:D");
+  const thisMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  return rows.some((r) => r[1] === "late_fee" && (r[0] ?? "").startsWith(thisMonth));
+}
+
 // ─── Payment audit log ────────────────────────────────────────────────────────
 
 export interface PaymentLogEntry {
@@ -568,4 +581,20 @@ export async function getDashboardSummary() {
     customersWithNegativeBalance,
     recentTransactions,
   };
+}
+
+/**
+ * Returns the createdAt timestamp of the most recent late_fee or
+ * manual_late_fee transaction, or null if none exist.
+ */
+export async function getLastLateFeeDate(): Promise<string | null> {
+  const id = await getSpreadsheetId();
+  // Columns D=type, E=description, F=amount, G=createdAt
+  const rows = await readSheet(id, "Transactions!D2:G");
+  const timestamps = rows
+    .filter((r) => r[0] === "late_fee" || r[0] === "manual_late_fee")
+    .map((r) => r[3]) // createdAt is index 3 in this range
+    .filter(Boolean);
+  if (timestamps.length === 0) return null;
+  return timestamps.sort().at(-1) ?? null;
 }

@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useApplyLateFees, useGetSpreadsheetUrl, getListCustomersQueryKey, getGetDashboardQueryKey } from "@workspace/api-client-react";
+import { useApplyLateFees, useGetSpreadsheetUrl, useGetLateFeeSchedule, getListCustomersQueryKey, getGetDashboardQueryKey, getGetLateFeeScheduleQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Card,
@@ -35,43 +34,24 @@ import { ExternalLink, CalendarClock, CheckCircle2, Clock, Zap } from "lucide-re
 import { Skeleton } from "@/components/ui/skeleton";
 import type { LateFeeResult } from "@workspace/api-client-react";
 
-interface SchedulerStatus {
-  lastRunKey: string | null;   // "YYYY-MM" or null
-  nextRunDate: string;         // "YYYY-MM-DD"
+function formatDate(isoString: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(isoString));
 }
 
-function useSchedulerStatus() {
-  return useQuery<SchedulerStatus>({
-    queryKey: ["scheduler-status"],
-    queryFn: async () => {
-      const res = await fetch("/api/admin/scheduler-status", { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch scheduler status");
-      return res.json();
-    },
-    refetchInterval: 60_000,
-  });
-}
-
-function formatMonthKey(key: string | null): string {
-  if (!key) return "Never";
-  const [year, month] = key.split("-");
-  return new Date(Number(year), Number(month) - 1, 1).toLocaleString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso + "T12:00:00").toLocaleDateString("en-US", {
+function formatNextDate(isoString: string): string {
+  return new Intl.DateTimeFormat("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
-  });
+  }).format(new Date(isoString));
 }
 
 export default function Admin() {
   const { data: sheetInfo, isLoading: sheetLoading } = useGetSpreadsheetUrl();
-  const { data: scheduler, isLoading: schedulerLoading } = useSchedulerStatus();
+  const { data: schedule, isLoading: scheduleLoading } = useGetLateFeeSchedule();
   const applyLateFees = useApplyLateFees();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -84,7 +64,7 @@ export default function Admin() {
         setLateFeeResult(data);
         queryClient.invalidateQueries({ queryKey: getListCustomersQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
-        queryClient.invalidateQueries({ queryKey: ["scheduler-status"] });
+        queryClient.invalidateQueries({ queryKey: getGetLateFeeScheduleQueryKey() });
         toast({
           title: "Late fees applied",
           description: `Applied to ${data.applied} account${data.applied !== 1 ? "s" : ""}.`,
@@ -124,7 +104,7 @@ export default function Admin() {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 text-sm">
-              {schedulerLoading ? (
+              {scheduleLoading ? (
                 <Skeleton className="h-8 w-40" />
               ) : (
                 <>
@@ -132,7 +112,7 @@ export default function Admin() {
                     <Clock className="w-4 h-4 shrink-0" />
                     <span>
                       <span className="font-medium">Last run:</span>{" "}
-                      {formatMonthKey(scheduler?.lastRunKey ?? null)}
+                      {schedule?.lastAppliedAt ? formatDate(schedule.lastAppliedAt) : "Never"}
                     </span>
                   </div>
                   <div className="hidden sm:block text-blue-300">·</div>
@@ -140,7 +120,7 @@ export default function Admin() {
                     <CalendarClock className="w-4 h-4 shrink-0" />
                     <span>
                       <span className="font-medium">Next:</span>{" "}
-                      {scheduler ? formatDate(scheduler.nextRunDate) : "—"}
+                      {schedule?.nextScheduledDate ? formatNextDate(schedule.nextScheduledDate) : "—"}
                     </span>
                   </div>
                 </>
@@ -162,8 +142,8 @@ export default function Admin() {
               <Badge variant="outline" className="text-xs text-gray-500">Manual override</Badge>
             </div>
             <CardDescription>
-              Manually trigger the 20% late fee script outside of its scheduled run. 
-              Safe to run — already-billed months are skipped automatically.
+              Manually trigger the 20% late fee script outside of its scheduled run.
+              The scheduler already runs this automatically on the 10th — use this only if needed.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -182,8 +162,6 @@ export default function Admin() {
                   <AlertDialogTitle>Apply Late Fees Now?</AlertDialogTitle>
                   <AlertDialogDescription className="text-base">
                     This will charge a <strong>20% late fee</strong> to every customer with a positive balance.
-                    The scheduler already runs this automatically on the 10th — use this only if you need
-                    to apply fees on a different date.
                     <br /><br />
                     This action creates transactions and cannot be bulk-undone.
                   </AlertDialogDescription>

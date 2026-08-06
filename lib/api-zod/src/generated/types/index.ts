@@ -19,6 +19,7 @@ export * from './dashboardSummary';
 export * from './healthStatus';
 export * from './lateFeeResult';
 export * from './lateFeeResultDetailsItem';
+export * from './lateFeeSchedule';
 export * from './recentTransaction';
 export * from './spreadsheetInfo';
 export * from './transaction';
