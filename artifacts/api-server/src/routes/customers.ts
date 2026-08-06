@@ -10,28 +10,17 @@ import {
 } from "@workspace/api-zod";
 import * as sheets from "../lib/googleSheets";
 import { requireAdmin } from "../middlewares/requireAdmin";
+import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
 
-// All customer routes require admin
-router.use(requireAdmin);
-
-router.get("/customers", async (req, res): Promise<void> => {
+// Read-only: any signed-in user
+router.get("/customers", requireAuth, async (req, res): Promise<void> => {
   const customers = await sheets.listCustomers();
   res.json(customers.map((c) => ListCustomersResponseItem.parse(c)));
 });
 
-router.post("/customers", async (req, res): Promise<void> => {
-  const parsed = CreateCustomerBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
-    return;
-  }
-  const customer = await sheets.createCustomer(parsed.data);
-  res.status(201).json(GetCustomerResponse.parse({ ...customer, transactions: [] }));
-});
-
-router.get("/customers/:id", async (req, res): Promise<void> => {
+router.get("/customers/:id", requireAuth, async (req, res): Promise<void> => {
   const params = GetCustomerParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -45,7 +34,18 @@ router.get("/customers/:id", async (req, res): Promise<void> => {
   res.json(GetCustomerResponse.parse(customer));
 });
 
-router.patch("/customers/:id", async (req, res): Promise<void> => {
+// Write operations: admin only
+router.post("/customers", requireAdmin, async (req, res): Promise<void> => {
+  const parsed = CreateCustomerBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  const customer = await sheets.createCustomer(parsed.data);
+  res.status(201).json(GetCustomerResponse.parse({ ...customer, transactions: [] }));
+});
+
+router.patch("/customers/:id", requireAdmin, async (req, res): Promise<void> => {
   const params = UpdateCustomerParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -64,7 +64,7 @@ router.patch("/customers/:id", async (req, res): Promise<void> => {
   res.json(ListCustomersResponseItem.parse(customer));
 });
 
-router.delete("/customers/:id", async (req, res): Promise<void> => {
+router.delete("/customers/:id", requireAdmin, async (req, res): Promise<void> => {
   const params = DeleteCustomerParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });

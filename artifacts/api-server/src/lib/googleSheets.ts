@@ -197,6 +197,12 @@ export async function ensureSheets(): Promise<void> {
       headers: ["id", "customerId", "date", "type", "description", "amount", "createdAt"],
     });
   }
+  if (!existing.has("PaymentLog")) {
+    sheetsToAdd.push({
+      title: "PaymentLog",
+      headers: ["id", "transactionId", "customerId", "amount", "description", "loggedByEmail", "loggedAt"],
+    });
+  }
 
   if (sheetsToAdd.length === 0) {
     logger.info("Required sheets already exist");
@@ -439,6 +445,44 @@ export async function deleteTransaction(customerId: string, txId: string): Promi
     }],
   });
   return true;
+}
+
+// ─── Payment audit log ────────────────────────────────────────────────────────
+
+export interface PaymentLogEntry {
+  transactionId: string;
+  customerId: string;
+  amount: number;
+  description: string;
+  loggedByEmail: string;
+  loggedAt: string;
+}
+
+/**
+ * Appends one row to the PaymentLog sheet.
+ * Call fire-and-forget — errors are logged but never thrown.
+ */
+export async function logPayment(entry: PaymentLogEntry): Promise<void> {
+  try {
+    const id = await getSpreadsheetId();
+    const row = [
+      randomUUID(),
+      entry.transactionId,
+      entry.customerId,
+      entry.amount.toString(),
+      entry.description,
+      entry.loggedByEmail,
+      entry.loggedAt,
+    ];
+    await sheetsRequest(
+      "POST",
+      `/v4/spreadsheets/${id}/values/PaymentLog!A1:G1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
+      { values: [row] }
+    );
+    logger.info({ transactionId: entry.transactionId, loggedBy: entry.loggedByEmail }, "Payment logged");
+  } catch (err) {
+    logger.error({ err }, "Failed to write payment log — continuing");
+  }
 }
 
 // ─── Late fees ────────────────────────────────────────────────────────────────

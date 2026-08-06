@@ -10,8 +10,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { queryClient } from "@/lib/queryClient";
 
 import Shell from "@/components/layout/Shell";
-import Dashboard from "@/pages/Dashboard";
-import Customers from "@/pages/Customers";
+import Members from "@/pages/Members";
 import CustomerDetail from "@/pages/CustomerDetail";
 import Admin from "@/pages/Admin";
 import HomeLanding from "@/pages/HomeLanding";
@@ -105,7 +104,7 @@ function HomeRedirect() {
   return (
     <>
       <Show when="signed-in">
-        <Redirect to="/dashboard" />
+        <Redirect to="/members" />
       </Show>
       <Show when="signed-out">
         <HomeLanding />
@@ -153,10 +152,11 @@ function ClerkProviderWithRoutes() {
             <Route path="/portal" component={Portal} />
             <Route path="/portal/:id" component={PortalDetail} />
 
-            {/* Protected admin routes */}
-            <Route path="/dashboard"><ProtectedRoute component={Dashboard} /></Route>
-            <Route path="/customers"><ProtectedRoute component={Customers} /></Route>
+            {/* Protected routes — any signed-in user */}
+            <Route path="/members"><ProtectedRoute component={Members} /></Route>
             <Route path="/customers/:id"><ProtectedRoute component={CustomerDetail} /></Route>
+
+            {/* Admin-only */}
             <Route path="/admin"><ProtectedRoute component={Admin} /></Route>
 
             <Route component={NotFound} />
