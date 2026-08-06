@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Internet Billing Manager"
+description = "An admin-only internet billing management web app. Stores all data in Google Sheets. Lets the admin manage customers, apply monthly service charges, equipment charges, one-time fees, late fees, and payments. Automatically applies 20% late fees on the 10th of each month for customers with a positive balance."
+version = "1.0.0"
+id = "artifacts/billing-app"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23436
+
+[services.development]
+run = "pnpm --filter @workspace/billing-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/billing-app", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/billing-app/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23436"
+BASE_PATH = "/"

@@ -3,20 +3,27 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Internet Billing Manager API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: customers
+    description: Customer management
+  - name: transactions
+    description: Charges and payments
+  - name: admin
+    description: Admin operations
+  - name: dashboard
+    description: Dashboard summaries
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +31,202 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /customers:
+    get:
+      operationId: listCustomers
+      tags: [customers]
+      summary: List all customers with current balances
+      responses:
+        "200":
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+    post:
+      operationId: createCustomer
+      tags: [customers]
+      summary: Create a new customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerInput"
+      responses:
+        "201":
+          description: Created customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+  /customers/{id}:
+    get:
+      operationId: getCustomer
+      tags: [customers]
+      summary: Get customer with full transaction history
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Customer details with transactions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    patch:
+      operationId: updateCustomer
+      tags: [customers]
+      summary: Update a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerUpdate"
+      responses:
+        "200":
+          description: Updated customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteCustomer
+      tags: [customers]
+      summary: Delete a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /customers/{id}/transactions:
+    post:
+      operationId: addTransaction
+      tags: [transactions]
+      summary: Add a charge or payment for a customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionInput"
+      responses:
+        "201":
+          description: Created transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "404":
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /customers/{id}/transactions/{txId}:
+    delete:
+      operationId: deleteTransaction
+      tags: [transactions]
+      summary: Delete a transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: txId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /admin/apply-late-fees:
+    post:
+      operationId: applyLateFees
+      tags: [admin]
+      summary: Apply 20% late fees to all customers with a positive balance
+      responses:
+        "200":
+          description: Result of applying late fees
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LateFeeResult"
+
+  /admin/spreadsheet-url:
+    get:
+      operationId: getSpreadsheetUrl
+      tags: [admin]
+      summary: Get the Google Sheets URL for the linked spreadsheet
+      responses:
+        "200":
+          description: Spreadsheet URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpreadsheetInfo"
+
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +237,219 @@ components:
       required:
         - status
 
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    Customer:
+      type: object
+      required: [id, name, address, phone, planName, monthlyRate, status, balance, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        planName:
+          type: string
+        monthlyRate:
+          type: number
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        notes:
+          type: ["string", "null"]
+        balance:
+          type: number
+        createdAt:
+          type: string
+
+    CustomerDetail:
+      type: object
+      required: [id, name, address, phone, planName, monthlyRate, status, balance, createdAt, transactions]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        planName:
+          type: string
+        monthlyRate:
+          type: number
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        notes:
+          type: ["string", "null"]
+        balance:
+          type: number
+        createdAt:
+          type: string
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+
+    CustomerInput:
+      type: object
+      required: [name, address, phone, planName, monthlyRate]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        address:
+          type: string
+        phone:
+          type: string
+        planName:
+          type: string
+        monthlyRate:
+          type: number
+          minimum: 0
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+          default: active
+        notes:
+          type: string
+
+    CustomerUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        address:
+          type: string
+        phone:
+          type: string
+        planName:
+          type: string
+        monthlyRate:
+          type: number
+          minimum: 0
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        notes:
+          type: string
+
+    Transaction:
+      type: object
+      required: [id, customerId, date, type, description, amount, createdAt]
+      properties:
+        id:
+          type: string
+        customerId:
+          type: string
+        date:
+          type: string
+        type:
+          type: string
+          enum: [service, equipment, one_time, late_fee, manual_late_fee, payment]
+        description:
+          type: string
+        amount:
+          type: number
+        createdAt:
+          type: string
+
+    TransactionInput:
+      type: object
+      required: [type, description, amount, date]
+      properties:
+        type:
+          type: string
+          enum: [service, equipment, one_time, late_fee, manual_late_fee, payment]
+        description:
+          type: string
+          minLength: 1
+        amount:
+          type: number
+        date:
+          type: string
+
+    LateFeeResult:
+      type: object
+      required: [applied, skipped, totalFeesAdded]
+      properties:
+        applied:
+          type: number
+        skipped:
+          type: number
+        totalFeesAdded:
+          type: number
+        details:
+          type: array
+          items:
+            type: object
+            required: [customerId, customerName, balance, feeAmount]
+            properties:
+              customerId:
+                type: string
+              customerName:
+                type: string
+              balance:
+                type: number
+              feeAmount:
+                type: number
+
+    SpreadsheetInfo:
+      type: object
+      required: [spreadsheetId, url, title]
+      properties:
+        spreadsheetId:
+          type: string
+        url:
+          type: string
+        title:
+          type: string
+
+    DashboardSummary:
+      type: object
+      required: [totalCustomers, activeCustomers, totalOutstanding, customersWithBalance, customersWithNegativeBalance, recentTransactions]
+      properties:
+        totalCustomers:
+          type: number
+        activeCustomers:
+          type: number
+        totalOutstanding:
+          type: number
+        customersWithBalance:
+          type: number
+        customersWithNegativeBalance:
+          type: number
+        recentTransactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecentTransaction"
+
+    RecentTransaction:
+      type: object
+      required: [id, customerId, customerName, date, type, description, amount]
+      properties:
+        id:
+          type: string
+        customerId:
+          type: string
+        customerName:
+          type: string
+        date:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        amount:
+          type: number

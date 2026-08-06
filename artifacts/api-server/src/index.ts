@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { ensureSheets } from "./lib/googleSheets";
 
 const rawPort = process.env["PORT"];
 
@@ -22,4 +23,9 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+
+  // Bootstrap the linked Google Spreadsheet on startup
+  ensureSheets().catch((e) => {
+    logger.error({ err: e }, "Failed to ensure sheets — will retry on first request");
+  });
 });
