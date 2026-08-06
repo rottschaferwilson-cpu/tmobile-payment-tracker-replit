@@ -1,31 +1,19 @@
 /**
- * Customer portal — billing history + payment submission.
- * No login required. Customer arrives here after picking their name.
+ * Customer portal — read-only billing history.
+ * No login required. Shows balance and transaction history only.
+ * Payments must be reported to the admin.
  */
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { format } from "date-fns";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, CreditCard, AlertCircle, Wifi, CheckCircle2 } from "lucide-react";
+import { AlertCircle, Wifi, Phone } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -41,23 +29,20 @@ interface Transaction {
   createdAt: string;
 }
 
-interface Customer {
+interface CustomerPortalData {
   id: string;
   name: string;
-  address: string;
-  phone: string;
   planName: string;
   monthlyRate: number;
   status: string;
-  notes: string | null;
   balance: number;
   transactions: Transaction[];
 }
 
-// ── Hooks ─────────────────────────────────────────────────────────────────────
+// ── Hook ──────────────────────────────────────────────────────────────────────
 
 function usePortalCustomer(id: string) {
-  return useQuery<Customer>({
+  return useQuery<CustomerPortalData>({
     queryKey: ["portal-customer", id],
     queryFn: async () => {
       const res = await fetch(`${BASE}/api/portal/customers/${id}`);
@@ -66,14 +51,6 @@ function usePortalCustomer(id: string) {
     },
   });
 }
-
-// ── Payment form schema ───────────────────────────────────────────────────────
-
-const paymentSchema = z.object({
-  amount: z.coerce.number().min(0.01, "Amount must be greater than $0"),
-  date: z.string().min(1, "Date is required"),
-  note: z.string().optional(),
-});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -103,57 +80,8 @@ export default function PortalDetail() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { data: customer, isLoading, error } = usePortalCustomer(id!);
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [successAmount, setSuccessAmount] = useState<number | null>(null);
 
-  const form = useForm<z.infer<typeof paymentSchema>>({
-    resolver: zodResolver(paymentSchema),
-    defaultValues: {
-      amount: 0,
-      date: new Date().toISOString().split("T")[0],
-      note: "",
-    },
-  });
-
-  // Pre-fill amount with balance when dialog opens
-  const handleOpenDialog = () => {
-    form.reset({
-      amount: customer && customer.balance > 0 ? customer.balance : 0,
-      date: new Date().toISOString().split("T")[0],
-      note: "",
-    });
-    setSuccessAmount(null);
-    setDialogOpen(true);
-  };
-
-  const submitPayment = useMutation({
-    mutationFn: async (values: z.infer<typeof paymentSchema>) => {
-      const res = await fetch(`${BASE}/api/portal/customers/${id}/payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error((err as any).error || "Failed to submit payment");
-      }
-      return res.json();
-    },
-    onSuccess: (_data, variables) => {
-      setSuccessAmount(variables.amount);
-      queryClient.invalidateQueries({ queryKey: ["portal-customer", id] });
-      queryClient.invalidateQueries({ queryKey: ["portal-customers"] });
-      toast({ title: "Payment recorded!", description: `${formatCurrency(variables.amount)} logged successfully.` });
-      setDialogOpen(false);
-    },
-    onError: (err: Error) => {
-      toast({ title: "Payment failed", description: err.message, variant: "destructive" });
-    },
-  });
-
-  // Build running balance (oldest → newest, displayed newest first)
+  // Build running balance — oldest first, display newest first
   const txWithBalance = customer?.transactions
     ? [...customer.transactions]
         .sort(
@@ -170,7 +98,7 @@ export default function PortalDetail() {
         .reverse()
     : [];
 
-  // ── Error / loading states ─────────────────────────────────────────────────
+  // ── Error state ────────────────────────────────────────────────────────────
 
   if (error) {
     return (
@@ -197,11 +125,11 @@ export default function PortalDetail() {
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           <button
             onClick={() => navigate("/portal")}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            className="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
+            ← Back
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-2">
             <Wifi className="w-5 h-5 text-blue-600" />
             <span className="font-semibold text-gray-900">
               {isLoading ? <Skeleton className="h-5 w-32 inline-block" /> : customer?.name}
@@ -211,20 +139,10 @@ export default function PortalDetail() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        {/* Success banner */}
-        {successAmount !== null && (
-          <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-green-800">
-            <CheckCircle2 className="w-5 h-5 shrink-0 text-green-600" />
-            <p className="font-medium">
-              Payment of <strong>{formatCurrency(successAmount)}</strong> recorded. Thank you!
-            </p>
-          </div>
-        )}
-
         {/* Balance card */}
         <Card className="shadow-sm border-gray-200">
           <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div>
                 <p className="text-sm text-gray-500 font-medium uppercase tracking-wide mb-1">Current Balance</p>
                 {isLoading ? (
@@ -245,95 +163,27 @@ export default function PortalDetail() {
                 )}
                 <p className="text-sm text-gray-500 mt-1">
                   {isLoading ? "" :
-                    (customer?.balance ?? 0) > 0 ? "Amount owed" :
+                    (customer?.balance ?? 0) > 0 ? "Amount currently owed" :
                     (customer?.balance ?? 0) < 0 ? "You have a credit on your account" :
                     "Your account is settled — thank you!"}
                 </p>
               </div>
 
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    onClick={handleOpenDialog}
-                    className="bg-green-600 hover:bg-green-700 text-white font-semibold h-12 px-6 shadow-sm shrink-0"
-                    disabled={isLoading}
-                  >
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    Record a Payment
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[400px]">
-                  <DialogHeader>
-                    <DialogTitle>Record a Payment</DialogTitle>
-                  </DialogHeader>
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit((v) => submitPayment.mutate(v))}
-                      className="space-y-5 pt-2"
-                    >
-                      <FormField
-                        control={form.control}
-                        name="amount"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Amount Paid ($)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0.01"
-                                placeholder="0.00"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="date"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Payment Date</FormLabel>
-                            <FormControl>
-                              <Input type="date" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="note"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Note <span className="text-gray-400 font-normal">(optional)</span></FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g. Cash payment, check #1234" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button
-                        type="submit"
-                        className="w-full bg-green-600 hover:bg-green-700 font-semibold"
-                        disabled={submitPayment.isPending}
-                      >
-                        {submitPayment.isPending ? "Saving…" : "Submit Payment"}
-                      </Button>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
+              {!isLoading && customer && (
+                <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-4 space-y-1 min-w-[180px]">
+                  <p><span className="font-medium text-gray-800">Plan:</span> {customer.planName}</p>
+                  <p><span className="font-medium text-gray-800">Monthly rate:</span> {formatCurrency(customer.monthlyRate)}</p>
+                </div>
+              )}
             </div>
 
-            {/* Plan info */}
-            {!isLoading && customer && (
-              <div className="mt-5 pt-5 border-t border-gray-100 flex flex-wrap gap-4 text-sm text-gray-600">
-                <span><span className="font-medium text-gray-800">Plan:</span> {customer.planName}</span>
-                <span><span className="font-medium text-gray-800">Monthly rate:</span> {formatCurrency(customer.monthlyRate)}</span>
+            {/* Payment instructions */}
+            {!isLoading && (customer?.balance ?? 0) > 0 && (
+              <div className="mt-5 pt-5 border-t border-gray-100 flex items-start gap-3 text-sm text-gray-600 bg-blue-50 rounded-lg p-4">
+                <Phone className="w-4 h-4 mt-0.5 text-blue-600 shrink-0" />
+                <p>
+                  To make a payment, please contact your provider directly. Your payment will be reflected here once recorded.
+                </p>
               </div>
             )}
           </CardContent>

@@ -1,13 +1,15 @@
 /**
- * Public portal routes — no admin auth required.
- * Customers can look up their own balance and submit payments.
+ * Public read-only portal routes — no auth required.
+ * Returns only the minimum data customers need to check their own balance.
+ * Intentionally strips sensitive fields (address, phone, notes).
+ * No write endpoints — payments must be recorded by the admin.
  */
 import { Router, type IRouter } from "express";
 import * as sheets from "../lib/googleSheets";
 
 const router: IRouter = Router();
 
-// List all customers (name + id only — no sensitive admin detail)
+// List customers — id, name, and balance only (no PII)
 router.get("/portal/customers", async (_req, res): Promise<void> => {
   const customers = await sheets.listCustomers();
   const summary = customers
@@ -17,49 +19,23 @@ router.get("/portal/customers", async (_req, res): Promise<void> => {
   res.json(summary);
 });
 
-// Get a single customer's balance + transaction history
+// Get a single customer's billing summary — balance + transactions only, no PII
 router.get("/portal/customers/:id", async (req, res): Promise<void> => {
   const customer = await sheets.getCustomer(req.params.id);
   if (!customer) {
     res.status(404).json({ error: "Customer not found" });
     return;
   }
-  res.json(customer);
-});
-
-// Submit a payment on behalf of a customer
-router.post("/portal/customers/:id/payment", async (req, res): Promise<void> => {
-  const { amount, date, note } = req.body as {
-    amount?: unknown;
-    date?: unknown;
-    note?: unknown;
-  };
-
-  const parsedAmount = Number(amount);
-  if (!parsedAmount || parsedAmount <= 0) {
-    res.status(400).json({ error: "amount must be a positive number" });
-    return;
-  }
-
-  const customer = await sheets.getCustomer(req.params.id);
-  if (!customer) {
-    res.status(404).json({ error: "Customer not found" });
-    return;
-  }
-
-  const txDate = typeof date === "string" && date ? date : new Date().toISOString().split("T")[0];
-  const description = typeof note === "string" && note.trim()
-    ? note.trim()
-    : "Payment submitted via portal";
-
-  const tx = await sheets.addTransaction(req.params.id, {
-    type: "payment",
-    description,
-    amount: Math.round(parsedAmount * 100) / 100,
-    date: txDate,
+  // Return only the fields needed for billing review — no address, phone, or notes
+  res.json({
+    id: customer.id,
+    name: customer.name,
+    planName: customer.planName,
+    monthlyRate: customer.monthlyRate,
+    status: customer.status,
+    balance: customer.balance,
+    transactions: customer.transactions,
   });
-
-  res.status(201).json(tx);
 });
 
 export default router;
