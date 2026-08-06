@@ -15,6 +15,8 @@ import Customers from "@/pages/Customers";
 import CustomerDetail from "@/pages/CustomerDetail";
 import Admin from "@/pages/Admin";
 import HomeLanding from "@/pages/HomeLanding";
+import Portal from "@/pages/Portal";
+import PortalDetail from "@/pages/PortalDetail";
 import NotFound from "@/pages/not-found";
 
 const clerkPubKey = publishableKeyFromHost(
@@ -147,7 +149,11 @@ function ClerkProviderWithRoutes() {
             <Route path="/sign-in/*?" component={SignInPage} />
             <Route path="/sign-up/*?" component={SignUpPage} />
             
-            {/* Protected Routes */}
+            {/* Public portal — no login required */}
+            <Route path="/portal" component={Portal} />
+            <Route path="/portal/:id" component={PortalDetail} />
+
+            {/* Protected admin routes */}
             <Route path="/dashboard"><ProtectedRoute component={Dashboard} /></Route>
             <Route path="/customers"><ProtectedRoute component={Customers} /></Route>
             <Route path="/customers/:id"><ProtectedRoute component={CustomerDetail} /></Route>
