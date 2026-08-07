@@ -40,13 +40,18 @@ app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Resolve publishable key from request host for custom domain support
+// In production, derive publishable key from request host for custom domain support.
+// In development, always use the env var directly — publishableKeyFromHost can
+// produce wrong keys for localhost/dev origins, causing 401 on every API call.
+const isProduction = process.env.NODE_ENV === "production";
 app.use(
   clerkMiddleware((req) => ({
-    publishableKey: publishableKeyFromHost(
-      getClerkProxyHost(req) ?? "",
-      process.env.CLERK_PUBLISHABLE_KEY,
-    ),
+    publishableKey: isProduction
+      ? publishableKeyFromHost(
+          getClerkProxyHost(req) ?? "",
+          process.env.CLERK_PUBLISHABLE_KEY,
+        )
+      : process.env.CLERK_PUBLISHABLE_KEY,
   })),
 );
 
