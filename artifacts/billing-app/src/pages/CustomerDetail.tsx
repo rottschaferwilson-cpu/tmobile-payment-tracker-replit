@@ -5,6 +5,7 @@ import {
   useGetCustomer,
   useAddTransaction,
   useDeleteTransaction,
+  useUpdateTransaction,
   useUpdateCustomer,
   getGetCustomerQueryKey,
 } from "@workspace/api-client-react";
@@ -73,12 +74,25 @@ export default function CustomerDetail() {
   const [txDialogOpen, setTxDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [txTypePreset, setTxTypePreset] = useState<"service" | "equipment" | "one_time" | "late_fee" | "payment">("payment");
+  const [txEditDialogOpen, setTxEditDialogOpen] = useState(false);
+  const [editingTxId, setEditingTxId] = useState<string | null>(null);
 
   const addTransaction = useAddTransaction();
   const deleteTransaction = useDeleteTransaction();
+  const updateTransaction = useUpdateTransaction();
   const updateCustomer = useUpdateCustomer();
 
   const txForm = useForm<z.infer<typeof transactionSchema>>({
+    resolver: zodResolver(transactionSchema),
+    defaultValues: {
+      type: "payment",
+      description: "",
+      amount: 0,
+      date: new Date().toISOString().split("T")[0],
+    },
+  });
+
+  const txEditForm = useForm<z.infer<typeof transactionSchema>>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       type: "payment",
@@ -152,6 +166,33 @@ export default function CustomerDetail() {
           setEditDialogOpen(false);
         },
         onError: () => toast({ title: "Failed to update member", variant: "destructive" }),
+      }
+    );
+  };
+
+  const handleOpenTxEditDialog = (tx: { id: string; type: string; description: string; amount: number; date: string }) => {
+    setEditingTxId(tx.id);
+    txEditForm.reset({
+      type: tx.type as z.infer<typeof transactionSchema>["type"],
+      description: tx.description,
+      amount: tx.amount,
+      date: tx.date,
+    });
+    setTxEditDialogOpen(true);
+  };
+
+  const onTxEditSubmit = (values: z.infer<typeof transactionSchema>) => {
+    if (!id || !editingTxId) return;
+    updateTransaction.mutate(
+      { id, txId: editingTxId, data: values },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetCustomerQueryKey(id) });
+          toast({ title: "Transaction updated" });
+          setTxEditDialogOpen(false);
+          setEditingTxId(null);
+        },
+        onError: () => toast({ title: "Failed to update transaction", variant: "destructive" }),
       }
     );
   };
@@ -479,6 +520,66 @@ export default function CustomerDetail() {
           </DialogContent>
         </Dialog>
 
+        {/* Edit transaction dialog */}
+        <Dialog open={txEditDialogOpen} onOpenChange={setTxEditDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Transaction</DialogTitle>
+            </DialogHeader>
+            <Form {...txEditForm}>
+              <form onSubmit={txEditForm.handleSubmit(onTxEditSubmit)} className="space-y-4 pt-4">
+                <FormField control={txEditForm.control} name="type" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Transaction Type</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="service">Service Charge</SelectItem>
+                        <SelectItem value="equipment">Equipment</SelectItem>
+                        <SelectItem value="one_time">One-Time Charge</SelectItem>
+                        <SelectItem value="late_fee">Late Fee</SelectItem>
+                        <SelectItem value="manual_late_fee">Manual Late Fee</SelectItem>
+                        <SelectItem value="payment">Payment</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={txEditForm.control} name="description" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl><Input {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField control={txEditForm.control} name="amount" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amount ($)</FormLabel>
+                      <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={txEditForm.control} name="date" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date</FormLabel>
+                      <FormControl><Input type="date" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+                <div className="flex justify-end pt-4">
+                  <Button type="submit" disabled={updateTransaction.isPending} className="w-full sm:w-auto">
+                    {updateTransaction.isPending ? "Saving…" : "Save Changes"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
         {/* Table */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <Table>
@@ -489,7 +590,7 @@ export default function CustomerDetail() {
                 <TableHead className="font-semibold text-gray-700">Description</TableHead>
                 <TableHead className="text-right font-semibold text-gray-700">Amount</TableHead>
                 <TableHead className="text-right font-semibold text-gray-700 border-l border-gray-200 bg-gray-100">Balance</TableHead>
-                {isAdmin && <TableHead className="w-[50px]" />}
+                {isAdmin && <TableHead className="w-[90px]" />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -535,27 +636,37 @@ export default function CustomerDetail() {
                     </TableCell>
                     {isAdmin && (
                       <TableCell>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Delete this {tx.type.replace(/_/g, " ")} for {formatCurrency(tx.amount)}? This cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteTx(tx.id)} className="bg-red-600 hover:bg-red-700">
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                            onClick={() => handleOpenTxEditDialog(tx)}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Delete this {tx.type.replace(/_/g, " ")} for {formatCurrency(tx.amount)}? This cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteTx(tx.id)} className="bg-red-600 hover:bg-red-700">
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </TableCell>
                     )}
                   </TableRow>

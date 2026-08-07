@@ -426,6 +426,36 @@ export async function addTransaction(customerId: string, input: TransactionInput
   return rowToTransaction(row);
 }
 
+export async function updateTransaction(
+  customerId: string,
+  txId: string,
+  input: TransactionInput
+): Promise<Transaction | null> {
+  const id = await getSpreadsheetId();
+  const rows = await readSheet(id, "Transactions!A2:G");
+  const rowIndex = rows.findIndex((r) => r[0] === txId && r[1] === customerId);
+  if (rowIndex === -1) return null;
+
+  const existing = rows[rowIndex];
+  const updated = [
+    existing[0],       // id
+    existing[1],       // customerId
+    input.date,
+    input.type,
+    input.description,
+    input.amount.toString(),
+    existing[6],       // createdAt — preserve original
+  ];
+
+  const sheetRow = rowIndex + 2; // header row 1, data starts row 2
+  await sheetsRequest(
+    "PUT",
+    `/v4/spreadsheets/${id}/values/Transactions!A${sheetRow}:G${sheetRow}?valueInputOption=RAW`,
+    { values: [updated] }
+  );
+  return rowToTransaction(updated);
+}
+
 export async function deleteTransaction(customerId: string, txId: string): Promise<boolean> {
   const id = await getSpreadsheetId();
   const rows = await readSheet(id, "Transactions!A2:B");

@@ -578,6 +578,63 @@ export const useAddTransaction = <TError = ErrorType<ApiError>,
       return useMutation(getAddTransactionMutationOptions(options));
     }
 
+export const getUpdateTransactionUrl = (id: string,
+    txId: string,) => {
+  return `/api/customers/${id}/transactions/${txId}`
+}
+
+/**
+ * @summary Update a transaction
+ */
+export const updateTransaction = async (id: string,
+    txId: string,
+    transactionInput: TransactionInput, options?: Parameters<typeof customFetch>[1]): Promise<Transaction> => {
+
+  return customFetch<Transaction>(getUpdateTransactionUrl(id, txId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(transactionInput)
+  }
+);}
+
+export const getUpdateTransactionMutationOptions = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTransaction>>, TError,{id: string;txId: string;data: BodyType<TransactionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateTransaction>>, TError,{id: string;txId: string;data: BodyType<TransactionInput>}, TContext> => {
+
+const mutationKey = ['updateTransaction'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTransaction>>, {id: string;txId: string;data: BodyType<TransactionInput>}> = (props) => {
+          const {id, txId, data} = props ?? {};
+          return updateTransaction(id, txId, data, requestOptions)
+        }
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateTransactionMutationResult = NonNullable<Awaited<ReturnType<typeof updateTransaction>>>
+    export type UpdateTransactionMutationBody = BodyType<TransactionInput>
+    export type UpdateTransactionMutationError = ErrorType<ApiError>
+
+    /**
+ * @summary Update a transaction
+ */
+export const useUpdateTransaction = <TError = ErrorType<ApiError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTransaction>>, TError,{id: string;txId: string;data: BodyType<TransactionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateTransaction>>,
+        TError,
+        {id: string;txId: string;data: BodyType<TransactionInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateTransactionMutationOptions(options));
+    }
+
 export const getDeleteTransactionUrl = (id: string,
     txId: string,) => {
 

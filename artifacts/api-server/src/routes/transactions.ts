@@ -5,6 +5,9 @@ import {
   AddTransactionBody,
   AddTransactionResponse,
   DeleteTransactionParams,
+  UpdateTransactionParams,
+  UpdateTransactionBody,
+  UpdateTransactionResponse,
 } from "@workspace/api-zod";
 import * as sheets from "../lib/googleSheets";
 import { requireAuth } from "../middlewares/requireAuth";
@@ -57,6 +60,26 @@ router.post("/customers/:id/transactions", requireAuth, async (req, res): Promis
     // Non-fatal — don't disrupt the response
     req.log?.warn({ err }, "Could not resolve Clerk user for payment log");
   }
+});
+
+// Updating transactions is admin-only
+router.patch("/customers/:id/transactions/:txId", requireAdmin, async (req, res): Promise<void> => {
+  const params = UpdateTransactionParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+  const parsed = UpdateTransactionBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+  const updated = await sheets.updateTransaction(params.data.id, params.data.txId, parsed.data);
+  if (!updated) {
+    res.status(404).json({ error: "Transaction not found" });
+    return;
+  }
+  res.json(UpdateTransactionResponse.parse(updated));
 });
 
 // Deleting transactions is admin-only

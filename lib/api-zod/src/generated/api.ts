@@ -171,6 +171,32 @@ export const AddTransactionResponse = zod.object({
 
 
 /**
+ * @summary Update a transaction
+ */
+export const UpdateTransactionParams = zod.object({
+  "id": zod.coerce.string(),
+  "txId": zod.coerce.string()
+})
+
+export const UpdateTransactionBody = zod.object({
+  "type": zod.enum(['service', 'equipment', 'one_time', 'late_fee', 'manual_late_fee', 'payment']),
+  "description": zod.string().min(1),
+  "amount": zod.number(),
+  "date": zod.string()
+})
+
+export const UpdateTransactionResponse = zod.object({
+  "id": zod.string(),
+  "customerId": zod.string(),
+  "date": zod.string(),
+  "type": zod.enum(['service', 'equipment', 'one_time', 'late_fee', 'manual_late_fee', 'payment']),
+  "description": zod.string(),
+  "amount": zod.number(),
+  "createdAt": zod.string()
+})
+
+
+/**
  * @summary Delete a transaction
  */
 export const DeleteTransactionParams = zod.object({
