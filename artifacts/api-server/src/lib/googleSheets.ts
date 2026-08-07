@@ -460,6 +460,156 @@ export async function hasLateFeeThisMonth(): Promise<boolean> {
   return rows.some((r) => r[1] === "late_fee" && (r[0] ?? "").startsWith(thisMonth));
 }
 
+// ─── Legacy import ────────────────────────────────────────────────────────────
+
+/**
+ * Clears all existing transactions and re-imports from the Payments source sheet.
+ * Column layout (0-indexed per member):
+ *   Hudson  : label=4  charge=5  paid=6  lateFee=7
+ *   Mamadee : label=8  charge=9  paid=10 lateFee=11
+ *   Anders  : label=12 charge=13 paid=14 lateFee=15
+ *   Ibe     : label=16 charge=17 paid=18 lateFee=19
+ *   Wil     : label=20 charge=21 paid=22 (no lateFee col)
+ */
+export async function importLegacyTransactions(): Promise<{
+  cleared: number;
+  imported: number;
+  skipped: number;
+}> {
+  const id = await getSpreadsheetId();
+
+  // Hardcoded member definitions — IDs match the live Customers sheet
+  const MEMBERS = [
+    { id: "020977cc-7a67-4e00-9b00-2d84565731de", name: "Hudson",  chargeCol: 5,  paidCol: 6,  lateFeeCol: 7  },
+    { id: "80dfd08a-c1ae-40c2-94eb-0d2d1261c2e4", name: "Mamadee", chargeCol: 9,  paidCol: 10, lateFeeCol: 11 },
+    { id: "4f245944-bd4b-4fb4-bed6-30d5067e9689", name: "Anders",  chargeCol: 13, paidCol: 14, lateFeeCol: 15 },
+    { id: "887472b8-b882-4265-8308-ac888794689d", name: "Ibe",     chargeCol: 17, paidCol: 18, lateFeeCol: 19 },
+    { id: "897a4ec6-687e-4454-a545-d869e43aceb9", name: "Wil",     chargeCol: 21, paidCol: 22, lateFeeCol: -1 },
+  ];
+
+  // Monthly rows (0-indexed) → ISO date. Row 6 in sheet = index 5 here.
+  const MONTHLY_DATES: Record<number, string> = {
+    5:  "2024-10-01", 6:  "2024-11-01", 7:  "2024-12-01",
+    8:  "2025-01-01", 9:  "2025-02-01", 10: "2025-03-01",
+    11: "2025-04-01", 12: "2025-05-01", 13: "2025-06-01",
+    14: "2025-07-01", 15: "2025-08-01", 16: "2025-09-01",
+    17: "2025-10-01", 18: "2025-11-01", 19: "2025-12-01",
+    20: "2026-01-01", 21: "2026-02-01", 22: "2026-03-01",
+    23: "2026-04-01", 24: "2026-05-01", 25: "2026-06-01",
+    26: "2026-07-01",
+  };
+
+  // Historical rows (0-indexed 1–4 = sheet rows 2–5) with approximate dates
+  const HISTORICAL_DATES: Record<number, string> = {
+    1: "2022-03-01",
+    2: "2023-06-01",
+    3: "2023-07-01",
+    4: "2024-09-01",
+  };
+
+  function parseAmt(cell: string | undefined): number {
+    if (!cell) return 0;
+    const s = cell.trim().replace(/\$/g, "").replace(/,/g, "").trim();
+    if (!s || /^-+\s*$/.test(s)) return 0;
+    const neg = s.match(/^\(([0-9.]+)\)$/);
+    if (neg) return -parseFloat(neg[1]);
+    return parseFloat(s) || 0;
+  }
+
+  // ── 1. Clear existing transactions ──────────────────────────────────────────
+  const existingTxRows = await readSheet(id, "Transactions!A2:A");
+  const txCount = existingTxRows.filter((r) => r[0]).length;
+  if (txCount > 0) {
+    await sheetsRequest("POST", `/v4/spreadsheets/${id}:batchUpdate`, {
+      requests: [{
+        deleteDimension: {
+          range: {
+            sheetId: 1571736392, // Transactions tab sheetId
+            dimension: "ROWS",
+            startIndex: 1,        // keep header (index 0)
+            endIndex: 1 + txCount,
+          },
+        },
+      }],
+    });
+    logger.info({ txCount }, "Cleared existing transactions");
+  }
+
+  // ── 2. Read Payments source sheet ───────────────────────────────────────────
+  const payRows = await readSheet(id, "Payments!A1:W29"); // rows 1–29 (row 30 = totals)
+
+  // ── 3. Build transaction rows ────────────────────────────────────────────────
+  const toImport: string[][] = [];
+  const now = new Date().toISOString();
+  let skipped = 0;
+
+  for (let ri = 1; ri < payRows.length; ri++) {
+    const row = payRows[ri];
+
+    let date: string;
+    let isHistorical: boolean;
+
+    if (ri in HISTORICAL_DATES) {
+      date = HISTORICAL_DATES[ri];
+      isHistorical = true;
+    } else if (ri in MONTHLY_DATES) {
+      date = MONTHLY_DATES[ri];
+      isHistorical = false;
+    } else {
+      skipped++;
+      continue;
+    }
+
+    const monthName = (row[1] ?? "").trim();
+
+    for (const m of MEMBERS) {
+      const label    = (row[m.chargeCol - 1] ?? "").trim();
+      const chargeAmt = parseAmt(row[m.chargeCol]);
+      const paidAmt   = parseAmt(row[m.paidCol]);
+      const lateFeeAmt = m.lateFeeCol >= 0 ? parseAmt(row[m.lateFeeCol]) : 0;
+
+      const periodLabel = label || monthName;
+
+      // Service / one-time charge
+      if (chargeAmt > 0) {
+        const type = isHistorical ? "one_time" : "service";
+        const desc = isHistorical
+          ? `Historical charges — ${periodLabel}`
+          : `Monthly service — ${monthName}`;
+        toImport.push([randomUUID(), m.id, date, type, desc, chargeAmt.toString(), now]);
+      }
+
+      // Payment (stored as negative in our system)
+      if (paidAmt > 0) {
+        const desc = isHistorical
+          ? `Historical payment — ${periodLabel}`
+          : `Payment — ${monthName}`;
+        toImport.push([randomUUID(), m.id, date, "payment", desc, (-paidAmt).toString(), now]);
+      }
+
+      // Late fee (only for members/months where a positive late fee column exists)
+      if (lateFeeAmt > 0) {
+        toImport.push([
+          randomUUID(), m.id, date, "late_fee",
+          `Late fee — ${monthName}`, lateFeeAmt.toString(), now,
+        ]);
+      }
+    }
+  }
+
+  // ── 4. Batch-append all rows ─────────────────────────────────────────────────
+  if (toImport.length > 0) {
+    await sheetsRequest(
+      "POST",
+      `/v4/spreadsheets/${id}/values/Transactions!A1:G1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
+      { values: toImport }
+    );
+  }
+
+  logger.info({ cleared: txCount, imported: toImport.length, skipped }, "Legacy import complete");
+  return { cleared: txCount, imported: toImport.length, skipped };
+}
+
 // ─── Payment audit log ────────────────────────────────────────────────────────
 
 export interface PaymentLogEntry {

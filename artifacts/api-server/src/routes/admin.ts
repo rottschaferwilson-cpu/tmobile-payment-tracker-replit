@@ -25,11 +25,16 @@ router.get("/admin/spreadsheet-url", async (req, res): Promise<void> => {
 
 router.get("/admin/late-fee-schedule", async (_req, res): Promise<void> => {
   const status = await getSchedulerStatus();
-  res.json(GetLateFeeScheduleResponse.parse(status));
+  res.json(status);
 });
 
 router.get("/admin/scheduler-status", (req, res): void => {
   res.json(getSchedulerStatus());
+});
+
+router.post("/admin/import-history", async (_req, res): Promise<void> => {
+  const result = await sheets.importLegacyTransactions();
+  res.json(result);
 });
 
 export default router;
