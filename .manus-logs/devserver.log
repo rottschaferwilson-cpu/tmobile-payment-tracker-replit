@@ -1,0 +1,249 @@
+[2026-08-06T20:09:20.040Z] Starting dev server with command: pnpm run dev
+[2026-08-06T20:09:21.918Z] > tmobile-payment-tracker@1.0.0 dev /home/ubuntu/tmobile-payment-tracker
+[2026-08-06T20:09:21.918Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-06T20:09:23.218Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-08-06T20:09:23.404Z] Server running on http://localhost:3000/
+[2026-08-06T20:58:30.337Z] 8:58:30 PM [tsx] change in ./server/routers.ts Restarting...
+[2026-08-06T20:58:31.896Z] c[OAuth] Initialized with baseURL: https://api.manus.im
+[2026-08-06T20:58:32.138Z] Server running on http://localhost:3000/
+[2026-08-06T21:01:48.905Z] 9:01:48 PM [vite] (client) page reload index.html
+[2026-08-06T21:02:24.792Z] ELIFECYCLE  Command failed.
+[2026-08-06T21:02:24.845Z] Dev server exited with code -1
+[2026-08-06T21:02:25.904Z] Starting dev server with command: pnpm run dev
+[2026-08-06T21:02:26.453Z] > tmobile-payment-tracker@1.0.0 dev /home/ubuntu/tmobile-payment-tracker
+[2026-08-06T21:02:26.453Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-06T21:02:27.763Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-08-06T21:02:27.929Z] Server running on http://localhost:3000/
+[2026-08-06T21:02:41.548Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-08-06T21:02:44.014Z] 9:02:44 PM [vite] (client) ✨ new dependencies optimized: @radix-ui/react-dialog
+[2026-08-06T21:02:44.014Z] 9:02:44 PM [vite] (client) ✨ optimized dependencies changed. reloading
+[2026-08-06T21:02:50.072Z] [Auth] Missing session cookie
+[2026-08-06T21:38:10.883Z] ELIFECYCLE  Command failed.
+[2026-08-06T21:38:10.913Z] Dev server exited with code -1
+[2026-08-06T21:38:11.988Z] Starting dev server with command: pnpm run dev
+[2026-08-06T21:38:12.530Z] > tmobile-payment-tracker@1.0.0 dev /home/ubuntu/tmobile-payment-tracker
+[2026-08-06T21:38:12.530Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-06T21:38:13.856Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-08-06T21:38:14.028Z] Server running on http://localhost:3000/
+[2026-08-06T21:38:17.574Z] ELIFECYCLE  Command failed.
+[2026-08-06T21:38:17.621Z] Dev server exited with code -1
+[2026-08-06T21:38:18.681Z] Starting dev server with command: pnpm run dev
+[2026-08-06T21:38:19.225Z] > tmobile-payment-tracker@1.0.0 dev /home/ubuntu/tmobile-payment-tracker
+[2026-08-06T21:38:19.225Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-06T21:38:20.495Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-08-06T21:38:20.665Z] Server running on http://localhost:3000/
+[2026-08-06T21:38:20.929Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-08-06T21:41:31.886Z] ELIFECYCLE  Command failed.
+[2026-08-06T21:41:31.914Z] Dev server exited with code -1
+[2026-08-06T21:41:32.991Z] Starting dev server with command: pnpm run dev
+[2026-08-06T21:41:33.539Z] > tmobile-payment-tracker@1.0.0 dev /home/ubuntu/tmobile-payment-tracker
+[2026-08-06T21:41:33.539Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-06T21:41:34.783Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-08-06T21:41:34.953Z] Server running on http://localhost:3000/
+[2026-08-06T21:46:41.705Z] ELIFECYCLE  Command failed.
+[2026-08-06T21:46:41.733Z] Dev server exited with code -1
+[2026-08-06T21:46:42.811Z] Starting dev server with command: pnpm run dev
+[2026-08-06T21:46:43.346Z] > tmobile-payment-tracker@1.0.0 dev /home/ubuntu/tmobile-payment-tracker
+[2026-08-06T21:46:43.346Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-06T21:46:44.613Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-08-06T21:46:44.786Z] Server running on http://localhost:3000/
+[2026-08-06T21:46:56.886Z] ELIFECYCLE  Command failed.
+[2026-08-06T21:46:56.945Z] Dev server exited with code -1
+[2026-08-06T21:46:57.992Z] Starting dev server with command: pnpm run dev
+[2026-08-06T21:46:58.533Z] > tmobile-payment-tracker@1.0.0 dev /home/ubuntu/tmobile-payment-tracker
+[2026-08-06T21:46:58.533Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-06T21:46:59.800Z] [OAuth] Initialized with baseURL: https://api.manus.im
+[2026-08-06T21:46:59.967Z] Server running on http://localhost:3000/
+[2026-08-06T21:47:00.253Z] [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[2026-08-06T22:56:54.142Z] 10:56:54 PM [tsx] change in ./vite.config.ts Restarting...
+[2026-08-06T22:56:54.288Z] cnode:internal/modules/cjs/loader:1247
+[2026-08-06T22:56:54.288Z] throw err;
+[2026-08-06T22:56:54.288Z] ^
+[2026-08-06T22:56:54.288Z] Error: Cannot find module '/home/ubuntu/tmobile-payment-tracker/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/preflight.cjs'
+[2026-08-06T22:56:54.288Z] Require stack:
+[2026-08-06T22:56:54.288Z] - internal/preload
+[2026-08-06T22:56:54.288Z] at Function._resolveFilename (node:internal/modules/cjs/loader:1244:15)
+[2026-08-06T22:56:54.288Z] at Function._load (node:internal/modules/cjs/loader:1070:27)
+[2026-08-06T22:56:54.288Z] at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2026-08-06T22:56:54.288Z] at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
+[2026-08-06T22:56:54.288Z] at Module.require (node:internal/modules/cjs/loader:1335:12)
+[2026-08-06T22:56:54.288Z] at node:internal/modules/cjs/loader:1834:12
+[2026-08-06T22:56:54.288Z] at loadPreloadModules (node:internal/process/pre_execution:726:5)
+[2026-08-06T22:56:54.288Z] at setupUserModules (node:internal/process/pre_execution:206:5)
+[2026-08-06T22:56:54.288Z] at prepareExecution (node:internal/process/pre_execution:159:5)
+[2026-08-06T22:56:54.288Z] at prepareMainThreadExecution (node:internal/process/pre_execution:54:10) {
+[2026-08-06T22:56:54.288Z] code: 'MODULE_NOT_FOUND',
+[2026-08-06T22:56:54.288Z] requireStack: [ 'internal/preload' ]
+[2026-08-06T22:56:54.288Z] }
+[2026-08-06T22:56:54.288Z] Node.js v22.13.0
+[2026-08-06T23:22:52.735Z] 11:22:52 PM [tsx] change in ./server/_core/sdk.ts Rerunning...
+[2026-08-06T23:22:52.761Z] cnode:internal/modules/cjs/loader:1247
+[2026-08-06T23:22:52.761Z] throw err;
+[2026-08-06T23:22:52.761Z] ^
+[2026-08-06T23:22:52.761Z] Error: Cannot find module '/home/ubuntu/tmobile-payment-tracker/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/preflight.cjs'
+[2026-08-06T23:22:52.761Z] Require stack:
+[2026-08-06T23:22:52.761Z] - internal/preload
+[2026-08-06T23:22:52.761Z] at Function._resolveFilename (node:internal/modules/cjs/loader:1244:15)
+[2026-08-06T23:22:52.761Z] at Function._load (node:internal/modules/cjs/loader:1070:27)
+[2026-08-06T23:22:52.761Z] at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2026-08-06T23:22:52.761Z] at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
+[2026-08-06T23:22:52.761Z] at Module.require (node:internal/modules/cjs/loader:1335:12)
+[2026-08-06T23:22:52.761Z] at node:internal/modules/cjs/loader:1834:12
+[2026-08-06T23:22:52.761Z] at loadPreloadModules (node:internal/process/pre_execution:726:5)
+[2026-08-06T23:22:52.761Z] at setupUserModules (node:internal/process/pre_execution:206:5)
+[2026-08-06T23:22:52.761Z] at prepareExecution (node:internal/process/pre_execution:159:5)
+[2026-08-06T23:22:52.761Z] at prepareMainThreadExecution (node:internal/process/pre_execution:54:10) {
+[2026-08-06T23:22:52.761Z] code: 'MODULE_NOT_FOUND',
+[2026-08-06T23:22:52.761Z] requireStack: [ 'internal/preload' ]
+[2026-08-06T23:22:52.761Z] }
+[2026-08-06T23:22:52.761Z] Node.js v22.13.0
+[2026-08-06T23:24:32.747Z] 11:24:32 PM [tsx] change in ./vite.config.ts Rerunning...
+[2026-08-06T23:24:32.773Z] cnode:internal/modules/cjs/loader:1247
+[2026-08-06T23:24:32.773Z] throw err;
+[2026-08-06T23:24:32.773Z] ^
+[2026-08-06T23:24:32.773Z] Error: Cannot find module '/home/ubuntu/tmobile-payment-tracker/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/preflight.cjs'
+[2026-08-06T23:24:32.773Z] Require stack:
+[2026-08-06T23:24:32.773Z] - internal/preload
+[2026-08-06T23:24:32.773Z] at Function._resolveFilename (node:internal/modules/cjs/loader:1244:15)
+[2026-08-06T23:24:32.773Z] at Function._load (node:internal/modules/cjs/loader:1070:27)
+[2026-08-06T23:24:32.773Z] at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2026-08-06T23:24:32.773Z] at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
+[2026-08-06T23:24:32.773Z] at Module.require (node:internal/modules/cjs/loader:1335:12)
+[2026-08-06T23:24:32.773Z] at node:internal/modules/cjs/loader:1834:12
+[2026-08-06T23:24:32.773Z] at loadPreloadModules (node:internal/process/pre_execution:726:5)
+[2026-08-06T23:24:32.773Z] at setupUserModules (node:internal/process/pre_execution:206:5)
+[2026-08-06T23:24:32.773Z] at prepareExecution (node:internal/process/pre_execution:159:5)
+[2026-08-06T23:24:32.773Z] at prepareMainThreadExecution (node:internal/process/pre_execution:54:10) {
+[2026-08-06T23:24:32.773Z] code: 'MODULE_NOT_FOUND',
+[2026-08-06T23:24:32.773Z] requireStack: [ 'internal/preload' ]
+[2026-08-06T23:24:32.773Z] }
+[2026-08-06T23:24:32.773Z] Node.js v22.13.0
+[2026-08-06T23:34:34.420Z] ELIFECYCLE  Command failed.
+[2026-08-06T23:34:34.433Z] Dev server exited with code -1
+[2026-08-06T23:34:35.506Z] Starting dev server with command: pnpm run dev
+[2026-08-06T23:34:35.975Z] > tmobile-payment-tracker@1.0.0 dev /home/ubuntu/tmobile-payment-tracker
+[2026-08-06T23:34:35.976Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-06T23:34:37.180Z] Server running on http://localhost:3000/
+[2026-08-06T23:42:32.820Z] 11:42:32 PM [vite] (client) hmr update /src/pages/Home.tsx, /src/index.css
+[2026-08-06T23:43:23.783Z] ELIFECYCLE  Command failed.
+[2026-08-06T23:43:23.824Z] Dev server exited with code -1
+[2026-08-06T23:43:24.886Z] Starting dev server with command: pnpm run dev
+[2026-08-06T23:43:25.176Z] > tmobile-payment-tracker@1.0.0 dev /home/ubuntu/tmobile-payment-tracker
+[2026-08-06T23:43:25.176Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-06T23:43:26.335Z] Server running on http://localhost:3000/
+[2026-08-06T23:51:04.754Z] 11:51:04 PM [vite] (client) hmr update /src/pages/Home.tsx, /src/index.css
+[2026-08-06T23:52:16.951Z] 11:52:16 PM [vite] (client) hmr update /src/pages/Home.tsx, /src/index.css
+[2026-08-06T23:52:24.451Z] 11:52:24 PM [vite] (client) hmr update /src/index.css
+[2026-08-06T23:52:24.452Z] 11:52:24 PM [vite] (client) page reload src/main.tsx
+[2026-08-06T23:52:33.666Z] ELIFECYCLE  Command failed.
+[2026-08-06T23:52:33.672Z] Dev server exited with code -1
+[2026-08-06T23:52:34.757Z] Starting dev server with command: pnpm run dev
+[2026-08-06T23:52:35.061Z] > tmobile-payment-tracker@1.0.0 dev /home/ubuntu/tmobile-payment-tracker
+[2026-08-06T23:52:35.061Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-06T23:52:36.139Z] Server running on http://localhost:3000/
+[2026-08-07T00:43:06.307Z] 12:43:06 AM [tsx] change in ./server/routers.ts Restarting...
+[2026-08-07T00:43:07.492Z] Server running on http://localhost:3000/
+[2026-08-07T00:43:22.231Z] ELIFECYCLE  Command failed.
+[2026-08-07T00:43:22.264Z] Dev server exited with code -1
+[2026-08-07T00:43:23.331Z] Starting dev server with command: pnpm run dev
+[2026-08-07T00:43:23.619Z] > tmobile-payment-tracker@1.0.0 dev /home/ubuntu/tmobile-payment-tracker
+[2026-08-07T00:43:23.619Z] > NODE_ENV=development tsx watch server/_core/index.ts
+[2026-08-07T00:43:24.739Z] Server running on http://localhost:3000/
+[2026-08-07T00:47:04.919Z] 12:47:04 AM [vite] (client) hmr update /src/pages/Home.tsx, /src/index.css
+[2026-08-07T00:47:51.301Z] 12:47:51 AM [vite] changed tsconfig file detected: /home/ubuntu/tmobile-payment-tracker/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+[2026-08-07T00:47:51.313Z] 12:47:51 AM [vite] (client) page reload src/main.tsx
+[2026-08-07T00:47:51.314Z] 12:47:51 AM [vite] (client) hmr update /src/index.css
+[2026-08-07T00:47:51.314Z] 12:47:51 AM [vite] (client) hmr update /src/pages/Home.tsx, /src/index.css
+[2026-08-07T00:47:51.383Z] 12:47:51 AM [vite] (client) page reload index.html
+[2026-08-07T00:47:51.383Z] 12:47:51 AM [vite] (client) page reload public/__manus__/debug-collector.js
+[2026-08-07T00:47:51.383Z] 12:47:51 AM [vite] (client) page reload src/App.tsx
+[2026-08-07T00:47:51.383Z] 12:47:51 AM [vite] (client) page reload src/_core/hooks/useAuth.ts
+[2026-08-07T00:47:51.383Z] 12:47:51 AM [vite] (client) page reload src/components/AIChatBox.tsx
+[2026-08-07T00:47:51.383Z] 12:47:51 AM [vite] (client) page reload src/const.ts
+[2026-08-07T00:47:51.384Z] 12:47:51 AM [vite] (client) hmr update /src/index.css
+[2026-08-07T00:47:51.384Z] 12:47:51 AM [vite] (client) page reload src/contexts/ThemeContext.tsx
+[2026-08-07T00:47:51.384Z] 12:47:51 AM [vite] (client) page reload src/components/DashboardLayoutSkeleton.tsx
+[2026-08-07T00:47:51.384Z] 12:47:51 AM [vite] (client) page reload src/components/ErrorBoundary.tsx
+[2026-08-07T00:47:51.384Z] 12:47:51 AM [vite] (client) page reload src/components/ManusDialog.tsx
+[2026-08-07T00:47:51.384Z] 12:47:51 AM [vite] (client) page reload src/components/Map.tsx
+[2026-08-07T00:47:51.384Z] 12:47:51 AM [vite] (client) page reload src/components/ui/accordion.tsx
+[2026-08-07T00:47:51.385Z] 12:47:51 AM [vite] (client) page reload src/components/ui/alert-dialog.tsx
+[2026-08-07T00:47:51.385Z] 12:47:51 AM [vite] (client) page reload src/components/ui/alert.tsx
+[2026-08-07T00:47:51.385Z] 12:47:51 AM [vite] (client) page reload src/components/ui/aspect-ratio.tsx
+[2026-08-07T00:47:51.385Z] 12:47:51 AM [vite] (client) page reload src/components/ui/avatar.tsx
+[2026-08-07T00:47:51.385Z] 12:47:51 AM [vite] (client) page reload src/components/ui/badge.tsx
+[2026-08-07T00:47:51.385Z] 12:47:51 AM [vite] (client) page reload src/components/ui/breadcrumb.tsx
+[2026-08-07T00:47:51.386Z] 12:47:51 AM [vite] (client) page reload src/components/ui/button-group.tsx
+[2026-08-07T00:47:51.386Z] 12:47:51 AM [vite] (client) page reload src/components/ui/button.tsx
+[2026-08-07T00:47:51.386Z] 12:47:51 AM [vite] (client) page reload src/components/ui/calendar.tsx
+[2026-08-07T00:47:51.386Z] 12:47:51 AM [vite] (client) page reload src/components/ui/card.tsx
+[2026-08-07T00:47:51.386Z] 12:47:51 AM [vite] (client) page reload src/components/ui/carousel.tsx
+[2026-08-07T00:47:51.386Z] 12:47:51 AM [vite] (client) page reload src/components/ui/chart.tsx
+[2026-08-07T00:47:51.386Z] 12:47:51 AM [vite] (client) page reload src/components/ui/checkbox.tsx
+[2026-08-07T00:47:51.386Z] 12:47:51 AM [vite] (client) page reload src/components/ui/collapsible.tsx
+[2026-08-07T00:47:51.387Z] 12:47:51 AM [vite] (client) page reload src/components/ui/command.tsx
+[2026-08-07T00:47:51.387Z] 12:47:51 AM [vite] (client) page reload src/components/ui/context-menu.tsx
+[2026-08-07T00:47:51.387Z] 12:47:51 AM [vite] (client) page reload src/components/ui/dialog.tsx
+[2026-08-07T00:47:51.387Z] 12:47:51 AM [vite] (client) page reload src/components/ui/drawer.tsx
+[2026-08-07T00:47:51.387Z] 12:47:51 AM [vite] (client) page reload src/components/ui/dropdown-menu.tsx
+[2026-08-07T00:47:51.387Z] 12:47:51 AM [vite] (client) page reload src/components/ui/empty.tsx
+[2026-08-07T00:47:51.387Z] 12:47:51 AM [vite] (client) page reload src/components/ui/field.tsx
+[2026-08-07T00:47:51.387Z] 12:47:51 AM [vite] (client) page reload src/components/ui/form.tsx
+[2026-08-07T00:47:51.387Z] 12:47:51 AM [vite] (client) page reload src/components/ui/hover-card.tsx
+[2026-08-07T00:47:51.388Z] 12:47:51 AM [vite] (client) page reload src/components/ui/input-group.tsx
+[2026-08-07T00:47:51.388Z] 12:47:51 AM [vite] (client) page reload src/components/ui/input-otp.tsx
+[2026-08-07T00:47:51.388Z] 12:47:51 AM [vite] (client) page reload src/components/ui/input.tsx
+[2026-08-07T00:47:51.388Z] 12:47:51 AM [vite] (client) page reload src/components/ui/item.tsx
+[2026-08-07T00:47:51.388Z] 12:47:51 AM [vite] (client) page reload src/components/ui/kbd.tsx
+[2026-08-07T00:47:51.388Z] 12:47:51 AM [vite] (client) page reload src/components/ui/label.tsx
+[2026-08-07T00:47:51.388Z] 12:47:51 AM [vite] (client) page reload src/components/ui/menubar.tsx
+[2026-08-07T00:47:51.388Z] 12:47:51 AM [vite] (client) page reload src/components/ui/navigation-menu.tsx
+[2026-08-07T00:47:51.388Z] 12:47:51 AM [vite] (client) page reload src/components/ui/pagination.tsx
+[2026-08-07T00:47:51.389Z] 12:47:51 AM [vite] (client) page reload src/components/ui/popover.tsx
+[2026-08-07T00:47:51.389Z] 12:47:51 AM [vite] (client) page reload src/components/ui/progress.tsx
+[2026-08-07T00:47:51.389Z] 12:47:51 AM [vite] (client) page reload src/components/ui/radio-group.tsx
+[2026-08-07T00:47:51.389Z] 12:47:51 AM [vite] (client) page reload src/components/ui/resizable.tsx
+[2026-08-07T00:47:51.389Z] 12:47:51 AM [vite] (client) page reload src/components/ui/scroll-area.tsx
+[2026-08-07T00:47:51.389Z] 12:47:51 AM [vite] (client) page reload src/components/ui/select.tsx
+[2026-08-07T00:47:51.389Z] 12:47:51 AM [vite] (client) page reload src/components/ui/separator.tsx
+[2026-08-07T00:47:51.389Z] 12:47:51 AM [vite] (client) page reload src/components/ui/sheet.tsx
+[2026-08-07T00:47:51.389Z] 12:47:51 AM [vite] (client) page reload src/components/ui/sidebar.tsx
+[2026-08-07T00:47:51.390Z] 12:47:51 AM [vite] (client) page reload src/components/ui/skeleton.tsx
+[2026-08-07T00:47:51.390Z] 12:47:51 AM [vite] (client) page reload src/components/ui/slider.tsx
+[2026-08-07T00:47:51.390Z] 12:47:51 AM [vite] (client) page reload src/components/ui/sonner.tsx
+[2026-08-07T00:47:51.390Z] 12:47:51 AM [vite] (client) page reload src/components/ui/spinner.tsx
+[2026-08-07T00:47:51.390Z] 12:47:51 AM [vite] (client) page reload src/components/ui/switch.tsx
+[2026-08-07T00:47:51.390Z] 12:47:51 AM [vite] (client) page reload src/components/ui/table.tsx
+[2026-08-07T00:47:51.390Z] 12:47:51 AM [vite] (client) page reload src/components/ui/tabs.tsx
+[2026-08-07T00:47:51.390Z] 12:47:51 AM [vite] (client) page reload src/components/ui/textarea.tsx
+[2026-08-07T00:47:51.390Z] 12:47:51 AM [vite] (client) page reload src/components/ui/toggle-group.tsx
+[2026-08-07T00:47:51.391Z] 12:47:51 AM [vite] (client) page reload src/components/ui/toggle.tsx
+[2026-08-07T00:47:51.391Z] 12:47:51 AM [vite] (client) page reload src/components/ui/tooltip.tsx
+[2026-08-07T00:47:51.391Z] 12:47:51 AM [vite] (client) page reload src/hooks/useComposition.ts
+[2026-08-07T00:47:51.391Z] 12:47:51 AM [vite] (client) page reload src/hooks/useMobile.tsx
+[2026-08-07T00:47:51.391Z] 12:47:51 AM [vite] (client) page reload src/hooks/usePersistFn.ts
+[2026-08-07T00:47:51.391Z] 12:47:51 AM [vite] (client) page reload src/lib/trpc.ts
+[2026-08-07T00:47:51.391Z] 12:47:51 AM [vite] (client) page reload src/lib/utils.ts
+[2026-08-07T00:47:51.391Z] 12:47:51 AM [vite] (client) page reload src/pages/ComponentShowcase.tsx
+[2026-08-07T00:47:51.392Z] 12:47:51 AM [vite] (client) page reload src/pages/NotFound.tsx
+[2026-08-07T00:47:51.392Z] 12:47:51 AM [vite] (client) page reload /home/ubuntu/tmobile-payment-tracker/shared/const.ts
+[2026-08-07T00:47:51.499Z] 12:47:51 AM [tsx] unlink in ./vite.config.ts Restarting...
+[2026-08-07T00:47:51.690Z] node:internal/modules/run_main:122
+[2026-08-07T00:47:51.690Z] triggerUncaughtException(
+[2026-08-07T00:47:51.690Z] ^
+[2026-08-07T00:47:51.690Z] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/ubuntu/tmobile-payment-tracker/server/_core/index.ts' imported from /home/ubuntu/tmobile-payment-tracker/
+[2026-08-07T00:47:51.690Z] at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+[2026-08-07T00:47:51.690Z] at moduleResolve (node:internal/modules/esm/resolve:932:10)
+[2026-08-07T00:47:51.690Z] at defaultResolve (node:internal/modules/esm/resolve:1056:11)
+[2026-08-07T00:47:51.690Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-08-07T00:47:51.690Z] at resolveBase (file:///home/ubuntu/tmobile-payment-tracker/node_modules/tsx/dist/register-Bu1t3CsJ.mjs:2:10334)
+[2026-08-07T00:47:51.690Z] at resolveDirectory (file:///home/ubuntu/tmobile-payment-tracker/node_modules/tsx/dist/register-Bu1t3CsJ.mjs:2:11421)
+[2026-08-07T00:47:51.690Z] at resolveTsPaths (file:///home/ubuntu/tmobile-payment-tracker/node_modules/tsx/dist/register-Bu1t3CsJ.mjs:2:13062)
+[2026-08-07T00:47:51.690Z] at resolve (file:///home/ubuntu/tmobile-payment-tracker/node_modules/tsx/dist/register-Bu1t3CsJ.mjs:2:14748)
+[2026-08-07T00:47:51.690Z] at nextResolve (node:internal/modules/esm/hooks:748:28)
+[2026-08-07T00:47:51.690Z] at Hooks.resolve (node:internal/modules/esm/hooks:240:30) {
+[2026-08-07T00:47:51.690Z] code: 'ERR_MODULE_NOT_FOUND',
+[2026-08-07T00:47:51.690Z] url: 'file:///home/ubuntu/tmobile-payment-tracker/server/_core/index.ts'
+[2026-08-07T00:47:51.690Z] }
+[2026-08-07T00:47:51.690Z] Node.js v22.13.0
+[2026-08-07T00:47:56.515Z] Dev server exited with code 0
